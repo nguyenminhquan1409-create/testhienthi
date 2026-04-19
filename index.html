@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>TKD SCOREBOARD - ADVANCED SUPERIORITY</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root { 
+            --red-side: #ff1744; 
+            --blue-side: #2962ff;
+            --bg-dark: #000000;
+            --gold: #ffea00;
+        }
+
+        body { 
+            background: var(--bg-dark); color: white; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; text-transform: uppercase;
+        }
+        
+        #winner-banner {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; padding: 50px 0; display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 5000; text-align: center;
+            border: 12px solid var(--gold); box-shadow: 0 0 150px rgba(255, 234, 0, 0.4);
+            background: rgba(0,0,0,0.95); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #winner-banner h1 { font-size: 8vw; margin: 0; font-weight: 900; color: white; }
+        #winner-banner p { font-size: 2vw; margin: 0; font-weight: bold; letter-spacing: 15px; color: var(--gold); }
+
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+        .side { flex: 1; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 0 140px 0; position: relative; box-sizing: border-box; }
+        .red { background: linear-gradient(145deg, #80001a 0%, var(--red-side) 100%); border-right: 3px solid #111; }
+        .blue { background: linear-gradient(215deg, #001e80 0%, var(--blue-side) 100%); }
+
+        .player-label { font-size: 3rem; font-weight: 900; letter-spacing: 5px; height: 80px; display: flex; align-items: center; }
+        .score-container { height: 40vh; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
+        .score { font-size: 27vw; font-weight: 900; line-height: 1; font-family: 'Arial Black', sans-serif; text-shadow: 0 20px 60px rgba(0,0,0,0.9); transition: font-size 0.3s ease; }
+
+        .point-log { position: absolute; top: 20px; width: 110px; height: 85%; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; scrollbar-width: none; z-index: 999; }
+        #r-logs { left: 10px; align-items: flex-start; }
+        #b-logs { right: 10px; align-items: flex-end; }
+        .log-item { font-size: 0.75rem; font-weight: 800; color: rgba(255, 255, 255, 0.6); background: rgba(255,255,255,0.12); padding: 2px 8px; border-radius: 4px; white-space: nowrap; border-left: 3px solid var(--gold); }
+
+        .footer-info { display: flex; flex-direction: column; align-items: center; height: 180px; justify-content: center; }
+        
+        .gj-container { 
+            background: rgba(0,0,0,0.95); padding: 2px 30px; 
+            border-radius: 100px; border: 2px solid rgba(255,255,255,0.15); 
+            display: flex; flex-direction: column; align-items: center; 
+            min-width: 200px; max-height: 120px; justify-content: center;
+        }
+        .gj-label { font-size: 1.6rem; color: #ff5252; font-weight: 900; line-height: 1; margin-bottom: -5px; }
+        .gj-value { font-size: 5rem; font-weight: 900; line-height: 0.9; color: white; }
+
+        .win-dots { display: flex; gap: 15px; margin-top: 15px; }
+        .dot { width: 35px; height: 35px; border-radius: 50%; border: 4px solid #fff; background: rgba(255,255,255,0.05); }
+        .dot.active { background: var(--gold); box-shadow: 0 0 25px var(--gold); border-color: var(--gold); }
+
+        .center-console { 
+            position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); 
+            background: rgba(0,0,0,0.95); border: 4px solid #333; border-radius: 100px; 
+            padding: 10px 20px; text-align: center; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-width: 440px; 
+            z-index: 100; 
+        }
+        #round-display { font-size: 1.4rem; font-weight: bold; color: #888; margin-bottom: -5px; width: 100%; text-align: center; }
+        #timer-display { 
+            font-size: 9rem; color: var(--gold); font-family: 'Courier New', monospace; font-weight: bold; 
+            line-height: 1; display: block; margin: 0 auto; width: 100%; text-align: center;
+        }
+
+        .desk-controls { position: fixed; bottom: 0; left: 0; right: 0; background: #0a0a0a; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #333; z-index: 4000; opacity: 0.1; transition: 0.3s; }
+        .desk-controls:hover { opacity: 1; }
+        .btn-group-side { display: flex; flex-direction: column; gap: 4px; }
+        .btn-row { display: flex; gap: 4px; align-items: center; }
+        .btn-desk { padding: 6px 10px; border: none; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
+        .input-text { background: #111; color: #fff; border: 1px solid #444; padding: 5px; border-radius: 4px; font-size: 0.75rem; width: 100px; }
+        .input-num { width: 35px; background: #000; color: var(--gold); border: 1px solid #444; text-align: center; border-radius: 4px; padding: 4px; font-weight: bold; font-size: 0.9rem; }
+        .select-custom { background: #000; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 4px; font-size: 0.7rem; }
+    </style>
+</head>
+<body>
+
+    <div id="winner-banner">
+        <p>WINNER</p>
+        <h1 id="winner-name-text">TÊN VĐV</h1>
+    </div>
+
+    <div class="side red" id="red-box">
+        <div class="player-label" id="r-name-display">HONG (Đỏ)</div>
+        <div class="score-container"><div class="score" id="r-score">0</div></div>
+        <div class="footer-info">
+            <div class="gj-container"><div class="gj-label">GAM-JEOM</div><div id="r-gj" class="gj-value">0</div></div>
+            <div class="win-dots" id="r-wins"><div class="dot"></div><div class="dot"></div></div>
+        </div>
+    </div>
+
+    <div class="center-console">
+        <div id="round-display">ROUND 1</div>
+        <div id="timer-display">02:00</div>
+    </div>
+
+    <div class="side blue" id="blue-box">
+        <div class="player-label" id="b-name-display">CHUNG (Xanh)</div>
+        <div class="score-container"><div class="score" id="b-score">0</div></div>
+        <div class="footer-info">
+            <div class="gj-container"><div class="gj-label">GAM-JEOM</div><div id="b-gj" class="gj-value">0</div></div>
+            <div class="win-dots" id="b-wins"><div class="dot"></div><div class="dot"></div></div>
+        </div>
+    </div>
+
+    <div class="point-log" id="r-logs"></div>
+    <div class="point-log" id="b-logs"></div>
+
+    <div class="desk-controls">
+        <div class="btn-group-side">
+            <div class="btn-row"><input type="text" id="in-r-name" class="input-text" placeholder="Tên VĐV Đỏ"><button class="btn-desk" style="background:#555" onclick="updateNames()">Đổi Tên</button></div>
+            <div class="btn-row">
+                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 1)">+1</button>
+                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 2)">+2</button>
+                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 3)">+3</button>
+                <button class="btn-desk" style="background:#d32f2f" onclick="addGj('rG')">+ 1 Lỗi Đỏ</button>
+                <button class="btn-desk" style="background:#2e7d32" onclick="subGj('rG')">Hủy Lỗi Đỏ</button>
+                <button class="btn-desk" style="background:#444" onclick="subPoint('rS')">-1 Điểm Đỏ</button>
+            </div>
+        </div>
+
+        <div class="btn-row" style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 100px; border: 2px solid #ffffff; gap: 12px;">
+            <div style="display:flex; flex-direction:column; gap:2px; border-right:1px solid #444; padding-right:10px;">
+                <label style="font-size:0.6rem; color:#ffea00;">MAX LỖI: 
+                    <select id="in-max-gj" class="select-custom" onchange="updateRules()">
+                        <option value="0">TẮT</option>
+                        <option value="5">5 LỖI</option>
+                    </select>
+                </label>
+                <label style="font-size:0.6rem; color:#ffea00;">MAX ĐIỂM: 
+                    <select id="in-max-pts" class="select-custom" onchange="updateRules()">
+                        <option value="0">TẮT</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                    </select>
+                </label>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px; border-right: 1px solid #444; padding-right: 10px;">
+                <label style="font-size:0.6rem; color:#ffea00; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" id="gap-toggle" onchange="toggleGap()"> 12 điểm cách biệt
+                </label>
+                <label style="font-size:0.6rem; color:#ffea00; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" id="one-ref-toggle" onchange="toggleOneRef()"> Chấp nhận 1 trọng tài
+                </label>
+            </div>
+            <div style="display:flex; align-items:center; gap:4px; padding-right: 5px;">
+                <input type="number" id="in-min" class="input-num" value="2">:<input type="number" id="in-sec" class="input-num" value="0">
+                <button class="btn-desk" style="background:#444;" onclick="setCustomTime()">Đặt</button>
+            </div>
+            <button class="btn-desk" style="background:#1b5e20; min-width:80px;" id="btn-timer-ctrl" onclick="toggleTimer()">BẮT ĐẦU</button>
+            <button class="btn-desk" style="background:#311b92" onclick="nextRoundManual()">Kết thúc</button>
+            <button class="btn-desk" style="background:#b71c1c" onclick="resetAll()">RESET</button>
+        </div>
+
+        <div class="btn-group-side">
+            <div class="btn-row"><input type="text" id="in-b-name" class="input-text" placeholder="Tên VĐV Xanh"><button class="btn-desk" style="background:#555" onclick="updateNames()">Đổi tên</button></div>
+            <div class="btn-row">
+                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 1)">+1</button>
+                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 2)">+2</button>
+                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 3)">+3</button>
+                <button class="btn-desk" style="background:#0000ff" onclick="addGj('bG')">+ 1 Lỗi xanh</button>
+                <button class="btn-desk" style="background:#2e7d32" onclick="subGj('bG')">Hủy Lỗi xanh</button>
+                <button class="btn-desk" style="background:#444" onclick="subPoint('bS')">-1 điểm xanh</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1NF3O5RuIRWKTQ05mn9Gph3_GSpiRlHM",
+            authDomain: "bangdiem-386b2.firebaseapp.com",
+            databaseURL: "https://bangdiem-386b2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bangdiem-386b2",
+            storageBucket: "bangdiem-386b2.firebasestorage.app",
+            messagingSenderId: "108159643737",
+            appId: "1:108159643737:web:7cbc7d1035ba6c9db98148",
+            measurementId: "G-SC4YV3YGVS"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const matchRef = db.ref('match');
+        const hitsRef = db.ref('hits');
+
+        // Bổ sung đầy đủ các biến đếm cho 1, 2, 3, 4, 6 điểm
+        let currentData = { bS: 0, rS: 0, bG: 0, rG: 0, bW: 0, rW: 0, round: 1, time: 120, run: false, rName: "HONG", bName: "CHUNG", rLogs: [], bLogs: [], gapEnabled: false, winnerDeclared: false, maxGj: 0, maxPts: 0, oneRefMode: false, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 };
+        let lastScores = { bS: 0, rS: 0 };
+        let timerInterval = null;
+
+        window.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' || e.keyCode === 32) {
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+                    e.preventDefault(); toggleTimer();
+                }
+            }
+        });
+
+        matchRef.on('value', (snap) => {
+            const data = snap.val(); if(!data) return;
+            if (data.bS !== lastScores.bS) { flash('blue-box', 'flash'); lastScores.bS = data.bS; }
+            if (data.rS !== lastScores.rS) { flash('red-box', 'flash'); lastScores.rS = data.rS; }
+            document.getElementById('b-score').innerText = data.bS;
+            document.getElementById('r-score').innerText = data.rS;
+            adjustScoreSize('b-score', data.bS); adjustScoreSize('r-score', data.rS);
+            document.getElementById('b-gj').innerText = data.bG;
+            document.getElementById('r-gj').innerText = data.rG;
+            document.getElementById('r-name-display').innerText = data.rName || "HONG";
+            document.getElementById('b-name-display').innerText = data.bName || "CHUNG";
+            document.getElementById('round-display').innerText = `ROUND ${data.round}`;
+            document.getElementById('btn-timer-ctrl').innerText = data.run ? "DỪNG" : "BẮT ĐẦU";
+            updateDots('b-wins', data.bW); updateDots('r-wins', data.rW);
+            updateLogs('r', data.rLogs); updateLogs('b', data.bLogs);
+
+            if (data.run && !timerInterval) { currentData.time = data.time; startLocalTimer(); } 
+            else if (!data.run && timerInterval) { stopLocalTimer(); currentData.time = data.time; updateTimerDisplay(currentData.time); }
+            if (!data.run) { currentData.time = data.time; updateTimerDisplay(data.time); }
+            currentData = data;
+            checkVictoryConditions();
+        });
+
+        function updateTimerDisplay(t) {
+            const display = document.getElementById('timer-display');
+            if (t > 10) {
+                let m = Math.floor(t / 60).toString().padStart(2, '0');
+                let s = Math.floor(t % 60).toString().padStart(2, '0');
+                display.innerText = `${m}:${s}`;
+            } else {
+                let s = Math.floor(t).toString().padStart(2, '0');
+                let ms = Math.floor((t % 1) * 100).toString().padStart(2, '0');
+                display.innerText = `${s}.${ms}`;
+            }
+        }
+
+        function toggleTimer() { matchRef.update({ run: !currentData.run, time: currentData.time }); }
+
+        function startLocalTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (currentData.time > 0) {
+                    currentData.time -= 0.01; updateTimerDisplay(currentData.time);
+                    if (Math.abs(currentData.time % 1) < 0.01) matchRef.update({ time: Math.round(currentData.time) });
+                } else { stopLocalTimer(); matchRef.update({ run: false, time: 0 }); }
+            }, 10);
+        }
+
+        function stopLocalTimer() { clearInterval(timerInterval); timerInterval = null; }
+
+        function awardPointFromRef(side, pts, refName) {
+            const logText = pts + " (" + refName + ")";
+            if (!currentData[side + 'Logs']) currentData[side + 'Logs'] = [];
+            currentData[side + 'Logs'].push(logText); currentData[side + 'S'] += pts;
+            
+            // Cập nhật bộ đếm điểm kỹ thuật (Trọng tài bấm)
+            currentData[side + pts] = (currentData[side + pts] || 0) + 1;
+            matchRef.update(currentData);
+        }
+
+        hitsRef.on('value', (snap) => {
+            const hits = snap.val(); if (!hits || !currentData.run) { if(hits) hitsRef.remove(); return; }
+            const refs = Object.keys(hits);
+            if (currentData.oneRefMode) { awardPointFromRef(hits[refs[0]].type[0], parseInt(hits[refs[0]].type.substring(1)), refs[0]); hitsRef.remove(); return; }
+            if (refs.length < 2) return;
+            for (let i = 0; i < refs.length; i++) {
+                for (let j = i + 1; j < refs.length; j++) {
+                    if (hits[refs[i]].type === hits[refs[j]].type && Math.abs(hits[refs[i]].time - hits[refs[j]].time) < 2000) {
+                        awardPointFromRef(hits[refs[i]].type[0], parseInt(hits[refs[i]].type.substring(1)), refs[i] + "," + refs[j]);
+                        hitsRef.remove(); return;
+                    }
+                }
+            }
+        });
+
+        function updateLogs(side, logs) {
+            const container = document.getElementById(side + '-logs'); container.innerHTML = '';
+            if (logs) {
+                logs.forEach(val => {
+                    const div = document.createElement('div'); div.className = 'log-item'; div.innerText = '+' + val;
+                    container.appendChild(div);
+                });
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        function checkVictoryConditions() {
+            if (currentData.winnerDeclared) return;
+            if (currentData.gapEnabled && Math.abs(currentData.rS - currentData.bS) >= 12) celebrateWinner(currentData.rS > currentData.bS ? 'red' : 'blue', currentData.rS > currentData.bS ? 'red-box' : 'blue-box');
+            if (currentData.maxPts > 0) {
+                if (currentData.rS >= currentData.maxPts) celebrateWinner('red', 'red-box');
+                else if (currentData.bS >= currentData.maxPts) celebrateWinner('blue', 'blue-box');
+            }
+        }
+
+        function celebrateWinner(winSide, boxId) {
+            if (currentData.winnerDeclared) return;
+            matchRef.update({ run: false, winnerDeclared: true });
+            stopLocalTimer();
+            flash(boxId, 'flash-winner');
+            const banner = document.getElementById('winner-banner');
+            document.getElementById('winner-name-text').innerText = winSide === 'red' ? (currentData.rName || "HONG") : (currentData.bName || "CHUNG");
+            banner.style.background = winSide === 'red' ? "var(--red-side)" : "var(--blue-side)";
+            banner.style.display = 'flex';
+            setTimeout(() => {
+                banner.style.display = 'none';
+                if (winSide === 'red') currentData.rW++; else currentData.bW++;
+                matchRef.update({ rW: currentData.rW, bW: currentData.bW });
+            }, 10000);
+        }
+
+        // LOGIC PHÂN CẤP ƯU THẾ MỚI
+        function nextRoundManual() {
+            if (!currentData.winnerDeclared) {
+                let winSide = '';
+                
+                if (currentData.rS > currentData.bS) {
+                    winSide = 'red';
+                } else if (currentData.bS > currentData.rS) {
+                    winSide = 'blue';
+                } else {
+                    // XÉT ƯU THẾ KHI HÒA ĐIỂM
+                    // 1. Tổng giá trị điểm 4 và 6
+                    let r46 = (currentData.r6 || 0) * 6 + (currentData.r4 || 0) * 4;
+                    let b46 = (currentData.b6 || 0) * 6 + (currentData.b4 || 0) * 4;
+
+                    if (r46 > b46) {
+                        winSide = 'red';
+                        alert("Hòa! ĐỎ thắng nhờ ưu thế tổng đòn 4&6.");
+                    } else if (b46 > r46) {
+                        winSide = 'blue';
+                        alert("Hòa! XANH thắng nhờ ưu thế tổng đòn 4&6.");
+                    } else {
+                        // 2. Xét số lần ghi điểm 6
+                        if ((currentData.r6 || 0) > (currentData.b6 || 0)) {
+                            winSide = 'red';
+                            alert("Hòa! ĐỎ thắng nhờ ghi nhiều điểm 6 hơn.");
+                        } else if ((currentData.b6 || 0) > (currentData.r6 || 0)) {
+                            winSide = 'blue';
+                            alert("Hòa! XANH thắng nhờ ghi nhiều điểm 6 hơn.");
+                        } else {
+                            // 3. Xét số lần ghi điểm 4
+                            if ((currentData.r4 || 0) > (currentData.b4 || 0)) {
+                                winSide = 'red';
+                                alert("Hòa! ĐỎ thắng nhờ ghi nhiều điểm 4 hơn.");
+                            } else if ((currentData.b4 || 0) > (currentData.r4 || 0)) {
+                                winSide = 'blue';
+                                alert("Hòa! XANH thắng nhờ ghi nhiều điểm 4 hơn.");
+                            } else {
+                                // 4. Xét số lần ghi điểm 3
+                                if ((currentData.r3 || 0) > (currentData.b3 || 0)) {
+                                    winSide = 'red';
+                                    alert("Hòa! ĐỎ thắng nhờ ghi nhiều điểm 3 hơn.");
+                                } else if ((currentData.b3 || 0) > (currentData.r3 || 0)) {
+                                    winSide = 'blue';
+                                    alert("Hòa! XANH thắng nhờ ghi nhiều điểm 3 hơn.");
+                                } else {
+                                    // 5. Xét số lần ghi điểm 2
+                                    if ((currentData.r2 || 0) > (currentData.b2 || 0)) {
+                                        winSide = 'red';
+                                        alert("Hòa! ĐỎ thắng nhờ ghi nhiều điểm 2 hơn.");
+                                    } else if ((currentData.b2 || 0) > (currentData.r2 || 0)) {
+                                        winSide = 'blue';
+                                        alert("Hòa! XANH thắng nhờ ghi nhiều điểm 2 hơn.");
+                                    } else {
+                                        // 6. Xét số lần ghi điểm 1
+                                        if ((currentData.r1 || 0) > (currentData.b1 || 0)) {
+                                            winSide = 'red';
+                                            alert("Hòa! ĐỎ thắng nhờ ghi nhiều điểm 1 hơn.");
+                                        } else if ((currentData.b1 || 0) > (currentData.r1 || 0)) {
+                                            winSide = 'blue';
+                                            alert("Hòa! XANH thắng nhờ ghi nhiều điểm 1 hơn.");
+                                        } else {
+                                            // Cuối cùng nếu tất cả bằng nhau
+                                            winSide = confirm("Tất cả chỉ số bằng nhau! ĐỎ (OK) thắng ưu thế trọng tài?") ? 'red' : 'blue';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                celebrateWinner(winSide, winSide === 'red' ? 'red-box' : 'blue-box');
+            } else finalizeRound();
+        }
+
+        function finalizeRound() {
+            matchRef.set({ bS:0,rS:0,bG:0,rG:0,bW:currentData.bW,rW:currentData.rW,round:currentData.round+1,time:120,run:false,rName:currentData.rName,bName:currentData.bName,rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled, oneRefMode: currentData.oneRefMode, winnerDeclared:false, maxGj: currentData.maxGj, maxPts: currentData.maxPts, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 });
+        }
+
+        function addGj(f) { 
+            currentData[f] += 1; const opp = f === 'bG' ? 'r' : 'b'; currentData[opp + 'S'] += 1; 
+            // Lưu ý: Lỗi Gam-jeom không được tính vào bộ đếm điểm kỹ thuật để xét ưu thế
+            if (currentData.maxGj > 0 && currentData[f] >= currentData.maxGj) celebrateWinner(opp, opp === 'r' ? 'red-box' : 'blue-box');
+            else matchRef.update(currentData);
+        }
+
+        function toggleOneRef() { matchRef.update({ oneRefMode: document.getElementById('one-ref-toggle').checked }); }
+        function updateRules() { matchRef.update({ maxGj: parseInt(document.getElementById('in-max-gj').value), maxPts: parseInt(document.getElementById('in-max-pts').value) }); }
+        function subGj(f) { if(currentData[f]>0) { currentData[f]-=1; const opp = f === 'bG' ? 'r' : 'b'; if(currentData[opp + 'S'] > 0) currentData[opp + 'S'] -= 1; matchRef.update(currentData); } }
+        function updateNames() { matchRef.update({ rName: document.getElementById('in-r-name').value || currentData.rName, bName: document.getElementById('in-b-name').value || currentData.bName }); }
+        
+        function addPointDirect(field, pts) { 
+            currentData[field] += pts; 
+            const side = field[0];
+            // Cập nhật bộ đếm điểm kỹ thuật (Bấm tay bàn thư ký)
+            currentData[side + pts] = (currentData[side + pts] || 0) + 1;
+            matchRef.update(currentData); 
+        }
+
+        function setCustomTime() { const m = parseInt(document.getElementById('in-min').value) || 0; const s = parseInt(document.getElementById('in-sec').value) || 0; currentData.time = (m * 60) + s; matchRef.update({ time: currentData.time }); }
+        function toggleGap() { matchRef.update({ gapEnabled: document.getElementById('gap-toggle').checked }); }
+        function flash(id, className) { const el = document.getElementById(id); el.classList.remove('flash', 'flash-winner'); void el.offsetWidth; el.classList.add(className); }
+        function updateDots(id, count) { const dots = document.getElementById(id).children; for(let i=0; i<2; i++) dots[i].className = i<count ? 'dot active' : 'dot'; }
+        function adjustScoreSize(id, score) { const el = document.getElementById(id); if (score >= 100) el.style.fontSize = "20vw"; else if (score >= 10) el.style.fontSize = "24vw"; else el.style.fontSize = "27vw"; }
+        function subPoint(f) { if(currentData[f]>0) { currentData[f]-=1; matchRef.update(currentData); } }
+        
+        function resetAll() { 
+            if(confirm("Reset toàn bộ trận đấu?")) { 
+                stopLocalTimer(); 
+                matchRef.set({bS:0,rS:0,bG:0,rG:0,bW:0,rW:0,round:1,time:120,run:false,rName:"HONG",bName:"CHUNG",rLogs:[],bLogs:[],gapEnabled:false, oneRefMode: false, winnerDeclared: false, maxGj: 0, maxPts: 0, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0}); 
+            } 
+        }
+    </script>
+</body>
+</html>
