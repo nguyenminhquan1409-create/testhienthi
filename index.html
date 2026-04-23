@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>TKD SCOREBOARD - ADVANCED SUPERIORITY</title>
+    <title>TKD SCOREBOARD - PRO SCALING</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -21,115 +21,117 @@
 
         .top-header-bar {
             position: absolute; top: 0; left: 0; width: 100%;
-            background: #000000; height: 60px; display: flex;
+            background: #000000; height: 6vh; display: flex;
             justify-content: center; align-items: center;
-            border-bottom: 2px solid #333; z-index: 1000;
+            border-bottom: 0px solid #333; z-index: 1000;
         }
-        .weight-info { font-size: 2.2rem; font-weight: 900; color: #ffffff; letter-spacing: 3px; }
+        .weight-info { font-size: 3vh; font-weight: 900; color: #ffffff; letter-spacing: 0.3vw; }
         
         #winner-banner {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; padding: 50px 0; display: none; flex-direction: column;
+            width: 85%; padding: 5vh 0; display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 5000; text-align: center;
-            border: none; 
-            box-shadow: 0 0 150px rgba(0, 0, 0, 0.5);
-            background: rgba(0,0,0,0.8); 
+            background: rgba(0,0,0,0.9); 
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        #winner-banner h1 { font-size: 8vw; margin: 0; font-weight: 900; color: white; }
-        #winner-banner p { font-size: 2vw; margin: 0; font-weight: bold; letter-spacing: 15px; color: var(--gold); }
+        #winner-banner h1 { font-size: 10vw; margin: 0; font-weight: 900; color: white; }
+        #winner-banner p { font-size: 2.5vw; margin: 0; font-weight: bold; letter-spacing: 1.5vw; color: var(--gold); }
 
-        /* ĐIỀU CHỈNH: Đưa PTG lên cao hơn (top: 40%) để không che ô thời gian */
         #ptg-display {
             position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--gold); color: black; font-size: 9rem; font-weight: 900;
-            padding: 10px 40px; border-radius: 10px; z-index: 6000; display: none;
-            box-shadow: 0 0 100px rgba(255, 234, 0, 0.5);
+            background: var(--gold); color: black; font-size: 15vh; font-weight: 900;
+            padding: 2vh 5vw; border-radius: 10px; z-index: 6000; display: none;
+            box-shadow: 0 0 10vh rgba(255, 234, 0, 0.5);
         }
-
-        .score-flash { animation: blink-score 0.8s infinite; }
-        @keyframes blink-score { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-
-        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
         .side { 
             flex: 1; width: 50%; display: flex; flex-direction: column; 
             align-items: center; justify-content: space-between; 
-            padding: 55px 0 80px 0; 
+            padding: 5vh 0 20vh 0; 
             position: relative; box-sizing: border-box; 
         }
-        .red { background: linear-gradient(145deg, #80001a 0%, var(--red-side) 100%); border-right: 3px solid #111; }
+        .red { background: linear-gradient(145deg, #80001a 0%, var(--red-side) 100%); border-right: 0.2vw solid #111; }
         .blue { background: linear-gradient(215deg, #001e80 0%, var(--blue-side) 100%); }
 
-        .player-label { font-size: 3rem; font-weight: 900; letter-spacing: 5px; height: 80px; display: flex; align-items: center; }
+        .player-label { font-size: 4vh; font-weight: 900; letter-spacing: 0.1vw; height: 10vh; display: flex; align-items: center; }
         
-        .score-container { height: 35vh; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; margin-bottom: 20px; }
-        .score { font-size: 27vw; font-weight: 900; line-height: 0.8; font-family: 'Arial Black', sans-serif; text-shadow: 0 20px 60px rgba(0,0,0,0.9); transition: font-size 0.3s ease; }
+        .score-container { height: 40vh; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
+        .score { font-size: 27vw; font-weight: 900; line-height: 0.8; font-family: 'Arial Black', sans-serif; text-shadow: 0 2vh 5vh rgba(0,0,0,0.9); }
 
-        .point-log { position: absolute; top: 80px; width: 110px; height: 80%; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; scrollbar-width: none; z-index: 999; }
-        #r-logs { left: 10px; align-items: flex-start; }
-        #b-logs { right: 10px; align-items: flex-end; }
-        .log-item { font-size: 0.75rem; font-weight: 800; color: rgba(255, 255, 255, 0.6); background: rgba(255,255,255,0.12); padding: 2px 8px; border-radius: 4px; white-space: nowrap; border-left: 3px solid var(--gold); }
+        .point-log { position: absolute; top: 12vh; width: 8vw; height: 50vh; display: flex; flex-direction: column; gap: 0.5vh; overflow-y: auto; scrollbar-width: none; z-index: 999; }
+        #r-logs { left: 1vw; align-items: flex-start; }
+        #b-logs { right: 1vw; align-items: flex-end; }
+        .log-item { font-size: 1.5vh; font-weight: 800; color: rgba(255, 255, 255, 0.8); background: rgba(0,0,0,0.3); padding: 0.4vh 0.8vw; border-radius: 0.5vh; white-space: nowrap; border-left: 0.3vw solid var(--gold); }
 
         .footer-info { 
             display: flex; flex-direction: column; align-items: center; 
-            height: 180px; justify-content: center; z-index: 10; 
-            position: relative; 
-            bottom: 52px; 
+            height: 22vh; justify-content: center; z-index: 10; 
         }
         
         .gj-container { 
-            background: rgba(0,0,0,0.95); padding: 2px 30px; border-radius: 100px; border: 2px solid rgba(255,255,255,0.15); 
-            display: flex; flex-direction: column; align-items: center; min-width: 200px; max-height: 120px; justify-content: center;
+            background: rgba(0,0,0,0.95); padding: 1vh 1vw; border-radius: 10vh; border: 0.2vh solid rgba(255,255,255,0.15); 
+            display: flex; flex-direction: column; align-items: center; min-width: 10vw;
         }
-        .gj-label { font-size: 1.6rem; color: #ff5252; font-weight: 900; line-height: 1; margin-bottom: -5px; }
-        .gj-value { font-size: 5rem; font-weight: 900; line-height: 0.9; color: white; }
+        .gj-label { font-size: 2.5vh; color: #ff5252; font-weight: 900; line-height: 1; }
+        .gj-value { font-size: 8vh; font-weight: 900; line-height: 0.9; color: white; }
 
-        .win-dots { display: flex; gap: 15px; margin-top: 15px; }
-        .dot { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); transition: 0.3s; }
-        .dot.active { background: var(--gold); box-shadow: 0 0 20px var(--gold); border-color: white; }
+        .win-dots { display: flex; gap: 2vw; margin-top: 2vh; }
+        .dot { width: 4vh; height: 4vh; border-radius: 50%; background: rgba(255,255,255,0.15); border: 0.3vh solid rgba(255,255,255,0.3); }
+        .dot.active { background: var(--gold); box-shadow: 0 0 2vh var(--gold); border-color: white; }
 
         .match-display-container {
-            position: absolute; top: 55px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.95); padding: 5px 40px; border-radius: 0px;
-            border: 0px solid rgba(255,255,255); display: flex; flex-direction: column;
-            align-items: center; min-width: 150px; z-index: 200;
+            position: absolute; top: 6.2vh; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.95); padding: 0.5vh 3vw; 
+            display: flex; flex-direction: column; align-items: center; z-index: 200;
         }
-        .match-label { font-size: 2.9rem; color: white; font-weight: 900; line-height: 1; }
-        .match-value { font-size: 6rem; font-weight: 900; line-height: 0.9; color: white; }
+        .match-label { font-size: 3vh; color: white; font-weight: 900; line-height: 1; }
+        .match-value { font-size: 7vh; font-weight: 900; line-height: 0.9; color: white; }
 
         .center-console { 
-            position: absolute; bottom: 155px; left: 50%; transform: translateX(-50%) scale(0.8); 
-            transform-origin: bottom;
-            background: rgba(0,0,0,0.95); border: 2px solid #ffffff; border-radius: 100px; 
-            padding: 2px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-width: 300px; z-index: 100; 
+            position: absolute; bottom: 25vh; left: 50%; transform: translateX(-50%); 
+            background: rgba(0,0,0,0.95); border: 0.3vh solid #ffffff; border-radius: 10vh; 
+            padding: 1vh 0vw; text-align: center; display: flex; flex-direction: column; align-items: center;
+            min-width: 19vw; z-index: 100; 
         }
-        #round-display { font-size: 3rem; font-weight: bold; color: #ffffff; margin-bottom: -5px; width: 100%; text-align: center; }
-        #timer-display { font-size: 9rem; color: var(--gold); font-family: 'Courier New', monospace; font-weight: bold; line-height: 1; display: block; margin: 0 auto; width: 100%; text-align: center; }
-
-        .rest-mode #timer-display { color: #ffffff !important; }
-        .rest-mode #round-display { color: #ffffff !important; }
-
-        .timer-paused { color: #ff1744 !important; animation: blink-timer 1s infinite; }
-        @keyframes blink-timer { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        #round-display { font-size: 3.5vh; font-weight: bold; color: #ffffff; }
+        #timer-display { font-size: 11vh; color: var(--gold); font-family: 'Courier New', monospace; font-weight: bold; line-height: 1; }
 
         .signature-text {
-            position: absolute; bottom: 139px; left: 48.975%; transform: translateX(-50%);
-            color: #ffffff; font-weight: bold; font-size: 0.7rem; text-transform: none; 
-            white-space: nowrap; z-index: 50; letter-spacing: 1px;
+            position: absolute; bottom: 23vh; left: 49.06%; transform: translateX(-50%);
+            color: #ffffff; font-weight: bold; font-size: 1.2vh; text-transform: none; 
+            z-index: 50; letter-spacing: 1px; opacity: 0.7;
         }
 
-        .desk-controls { position: fixed; bottom: 0; left: 0; right: 0; background: #0a0a0a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #333; z-index: 4000; opacity: 0.1; transition: 0.3s; }
+        .desk-controls { 
+            position: fixed; bottom: 0; left: 0; right: 0; background: #0a0a0a; 
+            padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; 
+            border-top: 2px solid #333; z-index: 4000; opacity: 0.1; transition: 0.3s; 
+        }
         .desk-controls:hover { opacity: 1; }
-        .desk-controls label { font-size: 0.85rem !important; } 
-        
+        .desk-controls label { font-size: 0.85rem; color: #ffea00; } 
         .btn-group-side { display: flex; flex-direction: column; gap: 6px; }
         .btn-row { display: flex; gap: 6px; align-items: center; }
-        .btn-desk { padding: 8px 12px; border: none; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; } 
+        .btn-desk { padding: 8px 12px; border: none; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; white-space: nowrap; min-width: 50px; text-align: center; } 
         .input-text { background: #111; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; font-size: 0.9rem; width: 110px; } 
         .input-num { width: 45px; background: #000; color: var(--gold); border: 1px solid #444; text-align: center; border-radius: 4px; padding: 6px; font-weight: bold; font-size: 1rem; } 
         .select-custom { background: #000; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; font-size: 0.85rem; }
+
+        @media screen and (max-width: 1200px) {
+            .desk-controls { padding: 5px; justify-content: space-evenly; gap: 4px; }
+            .btn-group-side { gap: 3px; }
+            .btn-row { gap: 3px; }
+            .btn-desk { padding: 5px 8px; font-size: 0.65rem; min-width: 35px; }
+            .input-text { width: 70px; font-size: 0.75rem; padding: 3px; }
+            .input-num { width: 30px; font-size: 0.8rem; padding: 3px; }
+            .select-custom { padding: 2px; font-size: 0.7rem; }
+            .desk-controls label { font-size: 0.65rem !important; }
+        }
+
+        .score-flash { animation: blink-score 0.8s infinite; }
+        @keyframes blink-score { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        .timer-paused { color: #ff1744 !important; animation: blink-timer 1s infinite; }
+        @keyframes blink-timer { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -137,19 +139,16 @@
     <div class="top-header-bar">
         <div class="weight-info">HẠNG CÂN: <span id="weight-sign-display"></span><span id="weight-num-display">50</span> KG</div>
     </div>
-
     <div id="ptg-display">PTG</div>
-
     <div id="winner-banner">
         <p id="winner-label-type">WINNER</p>
         <h1 id="winner-name-text">TÊN VĐV</h1>
     </div>
-
     <div class="match-display-container">
         <div class="match-label">MATCH</div>
         <div id="match-num-display" class="match-value">1</div>
     </div>
-
+    
     <div class="side red" id="red-box">
         <div class="player-label" id="r-name-display">HONG (Đỏ)</div>
         <div class="score-container"><div class="score" id="r-score">0</div></div>
@@ -163,7 +162,6 @@
         <div id="round-display">ROUND 1</div>
         <div id="timer-display">02:00</div>
     </div>
-
     <div class="signature-text">Nguyễn Minh Quân - 0937.707.001</div>
 
     <div class="side blue" id="blue-box">
@@ -181,29 +179,39 @@
     <div class="desk-controls">
         <div class="btn-group-side">
             <div class="btn-row"><input type="text" id="in-r-name" class="input-text" placeholder="Tên VĐV Đỏ"><button class="btn-desk" style="background:#555" onclick="updateNames()">Đổi Tên</button></div>
-            <div class="btn-row">
-                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 1)">+1</button>
-                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 2)">+2</button>
-                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 3)">+3</button>
-                <button class="btn-desk" style="background:#d4af37" onclick="addPointDirect('rS', 4)">+4</button>
-                <button class="btn-desk" style="background:#ff9800" onclick="addPointDirect('rS', 6)">+6</button>
-            </div>
-            <div class="btn-row">
-                <button class="btn-desk" style="background:#d32f2f" onclick="addGj('rG')">+ 1 Lỗi Đỏ</button>
-                <button class="btn-desk" style="background:#2e7d32" onclick="subGj('rG')">Hủy Lỗi Đỏ</button>
-                <button class="btn-desk" style="background:#444" onclick="subPoint('rS')">-1 Điểm Đỏ</button>
+            <div style="display: flex; gap: 8px;">
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <div class="btn-row">
+                        <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 1)">+1</button>
+                        <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 2)">+2</button>
+                        <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('rS', 3)">+3</button>
+                        <button class="btn-desk" style="background:#d4af37" onclick="addPointDirect('rS', 4)">+4</button>
+                        <button class="btn-desk" style="background:#ff9800" onclick="addPointDirect('rS', 6)">+6</button>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('rS', 1)">-1</button>
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('rS', 2)">-2</button>
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('rS', 3)">-3</button>
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('rS', 4)">-4</button>
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('rS', 6)">-6</button>
+                    </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <button class="btn-desk" style="background:#d32f2f; flex:1;" onclick="addGj('rG')">+ 1 LỖI</button>
+                    <button class="btn-desk" style="background:#2e7d32; flex:1;" onclick="subGj('rG')">HỦY LỖI</button>
+                </div>
             </div>
         </div>
 
-        <div class="btn-row" style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 100px; border: 2px solid #ffffff; gap: 12px;">
+        <div class="btn-row" style="background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 100px; border: 2px solid #ffffff; gap: 15px;">
             <div style="display:flex; flex-direction:column; gap:4px; border-right:1px solid #444; padding-right:10px;">
-                <label style="color:#ffea00;">MAX LỖI: 
+                <label>MAX LỖI: 
                     <select id="in-max-gj" class="select-custom" onchange="updateRules()">
                         <option value="0">TẮT</option>
                         <option value="5">5 LỖI</option>
                     </select>
                 </label>
-                <label style="color:#ffea00;">MAX ĐIỂM: 
+                <label>MAX ĐIỂM: 
                     <select id="in-max-pts" class="select-custom" onchange="updateRules()">
                         <option value="0">TẮT</option>
                         <option value="30">30</option>
@@ -215,54 +223,68 @@
             
             <div style="display:flex; flex-direction:column; gap:6px; border-right: 1px solid #444; padding-right: 10px;">
                 <div class="btn-row">
-                    <label style="color:#ffea00;">TRẬN: </label>
+                    <label>TRẬN: </label>
                     <input type="number" id="in-match-num" class="input-num" value="1">
-                    <button class="btn-desk" style="background:#444;" onclick="updateMatchNum()">Đặt</button>
+                    <button class="btn-desk" style="background:#444; min-width:unset; padding:4px 8px;" onclick="updateMatchNum()">Đặt</button>
                 </div>
                 <div class="btn-row">
                     <label style="color:#fff;">KG: </label>
                     <input type="text" id="in-weight-combined" class="input-text" style="width:60px" placeholder="-50">
-                    <button class="btn-desk" style="background:#555;" onclick="updateWeight()">Lưu</button>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <label style="color:#ffea00; display:flex; align-items:center; gap:5px; cursor:pointer;">
-                        <input type="checkbox" id="one-ref-toggle" onchange="toggleOneRef()"> 1 Ref
-                    </label>
-                    <label style="color:#ffea00; display:flex; align-items:center; gap:5px; cursor:pointer;">
-                        <input type="checkbox" id="gap-toggle" onchange="toggleGap()"> PTG
-                    </label>
+                    <button class="btn-desk" style="background:#555; min-width:unset; padding:4px 8px;" onclick="updateWeight()">Lưu</button>
                 </div>
             </div>
 
             <div style="display:flex; flex-direction:column; gap:6px; border-right: 1px solid #444; padding-right: 10px;">
                 <div class="btn-row">
                     <input type="number" id="in-min" class="input-num" value="2">:<input type="number" id="in-sec" class="input-num" value="0">
-                    <button class="btn-desk" style="background:#444; min-width: 110px;" onclick="setCustomTime()">Thi Đấu</button>
+                    <button class="btn-desk" style="background:#444; min-width: 90px;" onclick="setCustomTime()">Thi Đấu</button>
                 </div>
                 <div class="btn-row">
                     <input type="number" id="in-rest-min" class="input-num" value="1">:<input type="number" id="in-rest-sec" class="input-num" value="0">
-                    <button class="btn-desk" style="background:#555; min-width: 110px;" onclick="setRestTime()">Nghỉ</button>
+                    <button class="btn-desk" style="background:#555; min-width: 90px;" onclick="setRestTime()">Nghỉ</button>
                 </div>
             </div>
 
-            <button class="btn-desk" style="background:#1b5e20; min-width:80px;" id="btn-timer-ctrl" onclick="toggleTimer()">BẮT ĐẦU</button>
-            <button class="btn-desk" style="background:#311b92" onclick="nextRoundManual()">Kết thúc</button>
-            <button class="btn-desk" style="background:#b71c1c" onclick="resetAll()">RESET</button>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <div class="btn-row" style="gap: 4px;">
+                    <button class="btn-desk" style="background:#1b5e20; min-width:75px;" id="btn-timer-ctrl" onclick="toggleTimer()">BẮT ĐẦU</button>
+                    <button class="btn-desk" style="background:#311b92; min-width:75px;" onclick="nextRoundManual()">Kết thúc</button>
+                    <button class="btn-desk" style="background:#b71c1c; min-width:75px;" onclick="resetAll()">RESET</button>
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <label style="display:flex; align-items:center; gap:5px; cursor:pointer; font-size: 0.75rem; color:#ffea00;">
+                        <input type="checkbox" id="one-ref-toggle" onchange="toggleOneRef()"> 1 Ref
+                    </label>
+                    <label style="display:flex; align-items:center; gap:5px; cursor:pointer; font-size: 0.75rem; color:#ffea00;">
+                        <input type="checkbox" id="gap-toggle" onchange="toggleGap()"> PTG
+                    </label>
+                </div>
+            </div>
         </div>
 
         <div class="btn-group-side">
             <div class="btn-row"><input type="text" id="in-b-name" class="input-text" placeholder="Tên VĐV Xanh"><button class="btn-desk" style="background:#555" onclick="updateNames()">Đổi tên</button></div>
-            <div class="btn-row">
-                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 1)">+1</button>
-                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 2)">+2</button>
-                <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 3)">+3</button>
-                <button class="btn-desk" style="background:#d4af37" onclick="addPointDirect('bS', 4)">+4</button>
-                <button class="btn-desk" style="background:#ff9800" onclick="addPointDirect('bS', 6)">+6</button>
-            </div>
-            <div class="btn-row">
-                <button class="btn-desk" style="background:#0000ff" onclick="addGj('bG')">+ 1 Lỗi xanh</button>
-                <button class="btn-desk" style="background:#2e7d32" onclick="subGj('bG')">Hủy Lỗi xanh</button>
-                <button class="btn-desk" style="background:#444" onclick="subPoint('bS')">-1 điểm xanh</button>
+            <div style="display: flex; gap: 8px;">
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <div class="btn-row">
+                        <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 1)">+1</button>
+                        <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 2)">+2</button>
+                        <button class="btn-desk" style="background:#2e7d32" onclick="addPointDirect('bS', 3)">+3</button>
+                        <button class="btn-desk" style="background:#d4af37" onclick="addPointDirect('bS', 4)">+4</button>
+                        <button class="btn-desk" style="background:#ff9800" onclick="addPointDirect('bS', 6)">+6</button>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('bS', 1)">-1</button>
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('bS', 2)">-2</button>
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('bS', 3)">-3</button>
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('bS', 4)">-4</button>
+                        <button class="btn-desk" style="background:#444" onclick="subPointDirect('bS', 6)">-6</button>
+                    </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <button class="btn-desk" style="background:#0000ff; flex:1;" onclick="addGj('bG')">+ 1 LỖI</button>
+                    <button class="btn-desk" style="background:#2e7d32; flex:1;" onclick="subGj('bG')">HỦY LỖI</button>
+                </div>
             </div>
         </div>
     </div>
@@ -398,27 +420,24 @@
                 if(hits) hitsRef.remove(); 
                 return; 
             }
-            
             const refs = Object.keys(hits);
             if (currentData.oneRefMode) { 
                 awardPointFromRef(hits[refs[0]].type[0], parseInt(hits[refs[0]].type.substring(1)), refs[0]); 
                 hitsRef.remove(); 
                 return; 
             }
-
             const groups = {};
             refs.forEach(refId => {
                 const type = hits[refId].type;
                 if (!groups[type]) groups[type] = [];
                 groups[type].push({ id: refId, time: hits[refId].time });
             });
-
             for (const type in groups) {
                 const refereeHits = groups[type];
                 if (refereeHits.length >= 2) {
                     refereeHits.sort((a, b) => a.time - b.time);
                     const timeGap = refereeHits[refereeHits.length - 1].time - refereeHits[0].time;
-                    if (timeGap <= 2000) {
+                    if (timeGap <= 2500) {
                         const combinedRefs = refereeHits.map(h => h.id).join(",");
                         awardPointFromRef(type[0], parseInt(type.substring(1)), combinedRefs);
                         hitsRef.remove(); 
@@ -454,18 +473,16 @@
             if (currentData.winnerDeclared) return;
             matchRef.update({ run: false, winnerDeclared: true });
             stopLocalTimer();
-            
             if (isPtg) {
                 document.getElementById('ptg-display').style.display = 'block';
                 const scoreId = winSide === 'red' ? 'r-score' : 'b-score';
                 document.getElementById(scoreId).classList.add('score-flash');
-                
                 setTimeout(() => {
                     document.getElementById('ptg-display').style.display = 'none';
                     document.getElementById(scoreId).classList.remove('score-flash');
                     if (winSide === 'red') currentData.rW++; else currentData.bW++;
                     matchRef.update({ rW: currentData.rW, bW: currentData.bW });
-                }, 6000);
+                }, 3000);
             } else {
                 flash(boxId, 'flash-winner');
                 const banner = document.getElementById('winner-banner');
@@ -476,7 +493,7 @@
                     banner.style.display = 'none';
                     if (winSide === 'red') currentData.rW++; else currentData.bW++;
                     matchRef.update({ rW: currentData.rW, bW: currentData.bW });
-                }, 6000);
+                }, 3000);
             }
         }
 
@@ -488,20 +505,18 @@
                 else {
                     let r46Val = (currentData.r6 || 0) * 6 + (currentData.r4 || 0) * 4;
                     let b46Val = (currentData.b6 || 0) * 6 + (currentData.b4 || 0) * 4;
-                    if (r46Val > b46Val) {
-                        winSide = 'red'; alert(`Hòa! ĐỎ thắng nhờ tổng giá trị đòn 4&6 cao hơn (${r46Val} so với ${b46Val}).`);
-                    } else if (b46Val > r46Val) {
-                        winSide = 'blue'; alert(`Hòa! XANH thắng nhờ tổng giá trị đòn 4&6 cao hơn (${b46Val} so với ${r46Val}).`);
-                    } else {
+                    if (r46Val > b46Val) { winSide = 'red'; alert(`Hòa! ĐỎ thắng nhờ đòn 4&6 cao hơn.`); } 
+                    else if (b46Val > r46Val) { winSide = 'blue'; alert(`Hòa! XANH thắng nhờ đòn 4&6 cao hơn.`); } 
+                    else {
                         const checkOrder = [6, 4, 3, 2, 1];
                         for (let p of checkOrder) {
                             let rCount = (currentData['r' + p] || 0);
                             let bCount = (currentData['b' + p] || 0);
-                            if (rCount > bCount) { winSide = 'red'; alert(`Hòa! ĐỎ thắng nhờ ghi nhiều đòn ${p} điểm hơn.`); break; } 
-                            else if (bCount > rCount) { winSide = 'blue'; alert(`Hòa! XANH thắng nhờ ghi nhiều đòn ${p} điểm hơn.`); break; }
+                            if (rCount > bCount) { winSide = 'red'; break; } 
+                            else if (bCount > rCount) { winSide = 'blue'; break; }
                         }
                     }
-                    if (!winSide) winSide = confirm("Tất cả chỉ số ưu thế bằng nhau! ĐỎ (OK) thắng ưu thế trọng tài?") ? 'red' : 'blue';
+                    if (!winSide) winSide = confirm("Hòa tuyệt đối! ĐỎ (OK) thắng ưu thế?") ? 'red' : 'blue';
                 }
                 celebrateWinner(winSide, winSide === 'red' ? 'red-box' : 'blue-box');
             } else finalizeRound();
@@ -516,50 +531,60 @@
             if (currentData.maxGj > 0 && currentData[f] >= currentData.maxGj) celebrateWinner(opp, opp === 'r' ? 'red-box' : 'blue-box');
             else matchRef.update(currentData);
         }
+        
+        function subGj(f) { 
+            if(currentData[f] > 0) { 
+                currentData[f] -= 1; 
+                const opp = f === 'bG' ? 'r' : 'b'; 
+                if(currentData[opp + 'S'] > 0) currentData[opp + 'S'] -= 1; 
+                matchRef.update(currentData); 
+            } 
+        }
 
         function toggleOneRef() { matchRef.update({ oneRefMode: document.getElementById('one-ref-toggle').checked }); }
         function updateRules() { matchRef.update({ maxGj: parseInt(document.getElementById('in-max-gj').value), maxPts: parseInt(document.getElementById('in-max-pts').value) }); }
-        function subGj(f) { if(currentData[f]>0) { currentData[f]-=1; const opp = f === 'bG' ? 'r' : 'b'; if(currentData[opp + 'S'] > 0) currentData[opp + 'S'] -= 1; matchRef.update(currentData); } }
         function updateNames() { matchRef.update({ rName: document.getElementById('in-r-name').value || currentData.rName, bName: document.getElementById('in-b-name').value || currentData.bName }); }
         function updateMatchNum() { matchRef.update({ matchNum: parseInt(document.getElementById('in-match-num').value) || 1 }); }
-
+        
         function addPointDirect(field, pts) { 
-            const side = field[0]; 
-            currentData[field] += pts; 
+            const side = field[0]; currentData[field] += pts; 
             currentData[side + pts] = (currentData[side + pts] || 0) + 1;
             if (!currentData[side + 'Logs']) currentData[side + 'Logs'] = [];
             currentData[side + 'Logs'].push(pts.toString());
             matchRef.update(currentData); 
         }
 
-        function setCustomTime() { 
-            const val = getSetMatchTime();
-            currentData.time = val; 
-            matchRef.update({ time: val, isRest: false }); 
+        function subPointDirect(field, pts) {
+            const side = field[0];
+            if (currentData[field] >= pts) {
+                currentData[field] -= pts;
+                if (currentData[side + pts] > 0) {
+                    currentData[side + pts]--;
+                }
+                matchRef.update(currentData);
+            }
         }
 
+        function setCustomTime() { 
+            const val = getSetMatchTime(); currentData.time = val; matchRef.update({ time: val, isRest: false }); 
+        }
         function setRestTime() {
             const m = parseInt(document.getElementById('in-rest-min').value) || 0;
             const s = parseInt(document.getElementById('in-rest-sec').value) || 0;
             currentData.time = (m * 60) + s;
             matchRef.update({ time: currentData.time, isRest: true, run: false });
         }
-
         function toggleGap() { matchRef.update({ gapEnabled: document.getElementById('gap-toggle').checked }); }
         function flash(id, className) { const el = document.getElementById(id); el.classList.remove('flash', 'flash-winner'); void el.offsetWidth; el.classList.add(className); }
-        
         function updateDots(id, count) { 
-            const dots = document.getElementById(id).children; 
-            for(let i=0; i<2; i++) { dots[i].className = i < count ? 'dot active' : 'dot'; }
+            const dots = document.getElementById(id).children; for(let i=0; i<2; i++) { dots[i].className = i < count ? 'dot active' : 'dot'; }
         }
-        
         function adjustScoreSize(id, score) { const el = document.getElementById(id); if (score >= 100) el.style.fontSize = "20vw"; else if (score >= 10) el.style.fontSize = "24vw"; else el.style.fontSize = "27vw"; }
-        function subPoint(f) { if(currentData[f]>0) { currentData[f]-=1; matchRef.update(currentData); } }
         
         function resetAll() { 
             if(confirm("Reset toàn bộ trận đấu?")) { 
                 stopLocalTimer(); 
-                matchRef.set({bS:0,rS:0,bG:0,rG:0,bW:0,rW:0,round:1,time:getSetMatchTime(),run:false,isRest:false,rName:"HONG",bName:"CHUNG",rLogs:[],bLogs:[],gapEnabled:false, oneRefMode: false, winnerDeclared: false, maxGj: 0, maxPts: 0, matchNum: 1, weightNum: "50", weightSign: "-", r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0}); 
+                matchRef.set({bS:0,rS:0,bG:0,rG:0,bW:0,rW:0,round:1,time:getSetMatchTime(),run:false,isRest:false,rName:currentData.rName,bName:currentData.bName,rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled, oneRefMode: currentData.oneRefMode, winnerDeclared: false, maxGj: currentData.maxGj, maxPts: currentData.maxPts, matchNum: currentData.matchNum, weightNum: currentData.weightNum, weightSign: currentData.weightSign, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0}); 
             } 
         }
     </script>
