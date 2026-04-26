@@ -29,13 +29,39 @@
         
         #winner-banner {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; padding: 5vh 0; display: none; flex-direction: column;
+            width: 85%; padding: 4vh 0; display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 5000; text-align: center;
             background: rgba(0,0,0,0.9); 
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 4px solid var(--gold);
         }
         #winner-banner h1 { font-size: 10vw; margin: 0; font-weight: 900; color: white; }
         #winner-banner p { font-size: 2.5vw; margin: 0; font-weight: bold; letter-spacing: 1.5vw; color: var(--gold); }
+
+        /* KHUNG CHỌN TRONG SUỐT, NHỎ GỌN GIỮA MÀN HÌNH */
+        .tie-selection-box { 
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            display: none; flex-direction: column; align-items: center; gap: 10px; z-index: 6000;
+            width: 19vw; background: transparent; border: none;
+        }
+        
+        /* NHÃN HÒA TUYỆT ĐỐI KHUNG TRẮNG */
+        .tie-label-tag {
+            background: white; color: black; padding: 4px 12px;
+            font-size: 1.1vw; font-weight: 900; border-radius: 4px;
+            white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .btn-select-row { display: flex; gap: 10px; width: 100%; }
+
+        .btn-select { 
+            flex: 1; padding: 12px 0; font-size: 1.3vw; font-weight: 900; 
+            border: 2px solid white; border-radius: 8px; cursor: pointer; 
+            color: white; text-transform: uppercase; transition: 0.2s;
+        }
+        .btn-select:active { transform: scale(0.95); }
+        .select-red { background: var(--red-side); }
+        .select-blue { background: var(--blue-side); }
 
         #ptg-display {
             position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
@@ -116,17 +142,6 @@
         .input-num { width: 45px; background: #000; color: var(--gold); border: 1px solid #444; text-align: center; border-radius: 4px; padding: 6px; font-weight: bold; font-size: 1rem; } 
         .select-custom { background: #000; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; font-size: 0.85rem; }
 
-        @media screen and (max-width: 1200px) {
-            .desk-controls { padding: 5px; justify-content: space-evenly; gap: 4px; }
-            .btn-group-side { gap: 3px; }
-            .btn-row { gap: 3px; }
-            .btn-desk { padding: 5px 8px; font-size: 0.65rem; min-width: 35px; }
-            .input-text { width: 70px; font-size: 0.75rem; padding: 3px; }
-            .input-num { width: 30px; font-size: 0.8rem; padding: 3px; }
-            .select-custom { padding: 2px; font-size: 0.7rem; }
-            .desk-controls label { font-size: 0.65rem !important; }
-        }
-
         .score-flash { animation: blink-score 0.8s infinite; }
         @keyframes blink-score { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
         @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
@@ -140,10 +155,20 @@
         <div class="weight-info">HẠNG CÂN: <span id="weight-sign-display"></span><span id="weight-num-display">50</span> KG</div>
     </div>
     <div id="ptg-display">PTG</div>
+    
+    <div id="tie-selection-ui" class="tie-selection-box">
+        <div class="tie-label-tag">Hòa Tuyệt Đối</div>
+        <div class="btn-select-row">
+            <button class="btn-select select-red" onclick="pickTieWinner('red')">ĐỎ</button>
+            <button class="btn-select select-blue" onclick="pickTieWinner('blue')">XANH</button>
+        </div>
+    </div>
+
     <div id="winner-banner">
         <p id="winner-label-type">WINNER</p>
         <h1 id="winner-name-text">TÊN VĐV</h1>
     </div>
+
     <div class="match-display-container">
         <div class="match-label">MATCH</div>
         <div id="match-num-display" class="match-value">1</div>
@@ -203,7 +228,7 @@
             </div>
         </div>
 
-        <div class="btn-row" style="background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 100px; border: 2px solid #ffffff; gap: 15px;">
+        <div class="btn-row" style="background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 0px; border: 5px solid #ffffff; gap: 10px;">
             <div style="display:flex; flex-direction:column; gap:4px; border-right:1px solid #444; padding-right:10px;">
                 <label>MAX LỖI: 
                     <select id="in-max-gj" class="select-custom" onchange="updateRules()">
@@ -232,6 +257,12 @@
                     <input type="text" id="in-weight-combined" class="input-text" style="width:60px" placeholder="-50">
                     <button class="btn-desk" style="background:#555; min-width:unset; padding:4px 8px;" onclick="updateWeight()">Lưu</button>
                 </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px; border-right:1px solid #444; padding-right:10px;">
+                <div class="btn-row"><label style="font-size:0.65rem">PW R1:</label><input type="text" id="pw-R1" class="input-num" style="width:40px; font-size:0.8rem" onchange="updateRefPassword('R1')"></div>
+                <div class="btn-row"><label style="font-size:0.65rem">PW R2:</label><input type="text" id="pw-R2" class="input-num" style="width:40px; font-size:0.8rem" onchange="updateRefPassword('R2')"></div>
+                <div class="btn-row"><label style="font-size:0.65rem">PW R3:</label><input type="text" id="pw-R3" class="input-num" style="width:40px; font-size:0.8rem" onchange="updateRefPassword('R3')"></div>
             </div>
 
             <div style="display:flex; flex-direction:column; gap:6px; border-right: 1px solid #444; padding-right: 10px;">
@@ -290,16 +321,7 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-           apiKey: "AIzaSyA1NF3O5RuIRWKTQ05mn9Gph3_GSpiRlHM",
-  authDomain: "bangdiem-386b2.firebaseapp.com",
-  databaseURL: "https://bangdiem-386b2-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "bangdiem-386b2",
-  storageBucket: "bangdiem-386b2.firebasestorage.app",
-  messagingSenderId: "108159643737",
-  appId: "1:108159643737:web:7cbc7d1035ba6c9db98148",
-  measurementId: "G-SC4YV3YGVS"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyDNt_hUr6yFJepLhl_7T72UA4x1XRr6siQ", authDomain: "bangdiem2-36e35.firebaseapp.com", databaseURL: "https://bangdiem2-36e35-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "bangdiem2-36e35", storageBucket: "bangdiem2-36e35.firebasestorage.app", messagingSenderId: "353096502641", appId: "1:353096502641:web:bfe5608452627b12307ad0", measurementId: "G-FVDT7J72SF" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const matchRef = db.ref('match');
@@ -308,6 +330,7 @@
         let currentData = { bS: 0, rS: 0, bG: 0, rG: 0, bW: 0, rW: 0, round: 1, time: 120, run: false, isRest: false, rName: "HONG", bName: "CHUNG", rLogs: [], bLogs: [], gapEnabled: false, winnerDeclared: false, maxGj: 0, maxPts: 0, oneRefMode: false, matchNum: 1, weightNum: "50", weightSign: "-", r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 };
         let lastScores = { bS: 0, rS: 0 };
         let timerInterval = null;
+        let recentHits = []; 
 
         function getSetMatchTime() {
             const m = parseInt(document.getElementById('in-min').value) || 0;
@@ -347,6 +370,15 @@
                 else timerDisplay.classList.remove('timer-paused');
             }
 
+            // RESET GIAO DIỆN
+            if (!data.winnerDeclared) {
+                document.getElementById('winner-banner').style.display = 'none';
+                document.getElementById('ptg-display').style.display = 'none';
+                document.getElementById('tie-selection-ui').style.display = 'none';
+                document.getElementById('r-score').classList.remove('score-flash');
+                document.getElementById('b-score').classList.remove('score-flash');
+            }
+
             document.getElementById('btn-timer-ctrl').innerText = data.run ? "DỪNG" : "BẮT ĐẦU";
             document.getElementById('match-num-display').innerText = data.matchNum || 1;
             document.getElementById('weight-sign-display').innerText = data.weightSign || "";
@@ -363,14 +395,6 @@
             currentData = data;
             checkVictoryConditions();
         });
-
-        function updateWeight() {
-            let val = document.getElementById('in-weight-combined').value.trim();
-            if(!val) return;
-            let sign = val.startsWith('+') || val.startsWith('-') ? val.charAt(0) : "";
-            let num = sign ? val.substring(1) : val;
-            matchRef.update({ weightSign: sign, weightNum: num });
-        }
 
         function updateTimerDisplay(t) {
             const display = document.getElementById('timer-display');
@@ -398,7 +422,7 @@
                     if (currentData.isRest) {
                         matchRef.update({ run: false, time: getSetMatchTime(), isRest: false });
                     } else {
-                        matchRef.update({ run: false, time: 0 }); 
+                        handleAutoTimeUp();
                     }
                 }
             }, 10);
@@ -406,53 +430,142 @@
 
         function stopLocalTimer() { clearInterval(timerInterval); timerInterval = null; }
 
+        function handleAutoTimeUp() {
+            if (currentData.winnerDeclared) return;
+            matchRef.update({ run: false, time: 0 });
+
+            if (currentData.rS > currentData.bS) {
+                celebrateWinner('red', 'red-box');
+            } else if (currentData.bS > currentData.rS) {
+                celebrateWinner('blue', 'blue-box');
+            } else {
+                let winSide = autoCheckTieBreak();
+                if (winSide) {
+                    celebrateWinner(winSide, winSide === 'red' ? 'red-box' : 'blue-box');
+                } else {
+                    // HIỆN KHUNG CHỌN TRONG SUỐT
+                    document.getElementById('tie-selection-ui').style.display = 'flex';
+                }
+            }
+        }
+
+        function autoCheckTieBreak() {
+            let rTech = (currentData.r6 || 0) * 6 + (currentData.r4 || 0) * 4;
+            let bTech = (currentData.b6 || 0) * 6 + (currentData.b4 || 0) * 4;
+            if (rTech > bTech) return 'red';
+            if (bTech > rTech) return 'blue';
+            const checkOrder = [6, 4, 3, 2, 1];
+            for (let p of checkOrder) {
+                let rCount = currentData['r' + p] || 0;
+                let bCount = currentData['b' + p] || 0;
+                if (rCount > bCount) return 'red';
+                if (bCount > rCount) return 'blue';
+            }
+            return null;
+        }
+
+        function pickTieWinner(side) {
+            document.getElementById('tie-selection-ui').style.display = 'none';
+            celebrateWinner(side, side === 'red' ? 'red-box' : 'blue-box');
+        }
+
+        function celebrateWinner(winSide, boxId, isPtg = false) {
+            if (currentData.winnerDeclared) return;
+            matchRef.update({ run: false, winnerDeclared: true });
+            stopLocalTimer();
+            
+            let newWins = (winSide === 'red') ? { rW: currentData.rW + 1 } : { bW: currentData.bW + 1 };
+            matchRef.update(newWins);
+
+            if (isPtg) {
+                document.getElementById('ptg-display').style.display = 'block';
+                const scoreId = winSide === 'red' ? 'r-score' : 'b-score';
+                document.getElementById(scoreId).classList.add('score-flash');
+            } else {
+                flash(boxId, 'flash-winner');
+                const banner = document.getElementById('winner-banner');
+                document.getElementById('winner-label-type').innerText = "ROUND WINNER";
+                document.getElementById('winner-name-text').innerText = winSide === 'red' ? (currentData.rName || "HONG") : (currentData.bName || "CHUNG");
+                banner.style.backgroundColor = winSide === 'red' ? "rgba(255, 23, 68, 0.95)" : "rgba(41, 98, 255, 0.95)";
+                banner.style.display = 'flex';
+            }
+        }
+
+        function nextRoundManual() {
+            if (!currentData.winnerDeclared) {
+                let winSide = '';
+                if (currentData.rS > currentData.bS) winSide = 'red';
+                else if (currentData.bS > currentData.rS) winSide = 'blue';
+                else {
+                    let winSideTie = autoCheckTieBreak();
+                    if (winSideTie) winSide = winSideTie;
+                    if (!winSide) {
+                        handleAutoTimeUp();
+                        return;
+                    }
+                }
+                celebrateWinner(winSide, winSide === 'red' ? 'red-box' : 'blue-box');
+            } else {
+                finalizeRound();
+            }
+        }
+
+        function finalizeRound() {
+            matchRef.set({ bS:0,rS:0,bG:0,rG:0,bW:currentData.bW,rW:currentData.rW,round:currentData.round+1,time:getSetMatchTime(),run:false,isRest:false,rName:currentData.rName,bName:currentData.bName,rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled, oneRefMode: currentData.oneRefMode, winnerDeclared:false, maxGj: currentData.maxGj, maxPts: currentData.maxPts, matchNum: currentData.matchNum, weightNum: currentData.weightNum, weightSign: currentData.weightSign, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 });
+            hitsRef.remove(); 
+            recentHits = [];
+        }
+
         function awardPointFromRef(side, pts, refName) {
             const logText = pts + " (" + refName + ")";
-            if (!currentData[side + 'Logs']) currentData[side + 'Logs'] = [];
-            currentData[side + 'Logs'].push(logText); currentData[side + 'S'] += pts;
+            if (!currentData[side + 'Logs'] || !Array.isArray(currentData[side + 'Logs'])) { currentData[side + 'Logs'] = []; }
+            currentData[side + 'Logs'].push(logText); 
+            currentData[side + 'S'] += pts;
             currentData[side + pts] = (currentData[side + pts] || 0) + 1;
             matchRef.update(currentData);
         }
 
-        hitsRef.on('value', (snap) => {
-            const hits = snap.val(); 
-            if (!hits || !currentData.run || currentData.isRest) { 
-                if(hits) hitsRef.remove(); 
-                return; 
+        hitsRef.on('child_added', (snap) => {
+            const hit = snap.val(); const hitKey = snap.key;
+            if (!hit || !currentData.run || currentData.isRest) return;
+            const now = Date.now();
+            if (currentData.oneRefMode) {
+                awardPointFromRef(hit.type[0], parseInt(hit.type.substring(1)), hit.refId);
+                db.ref('hits/' + hitKey).remove(); return;
             }
-            const refs = Object.keys(hits);
-            if (currentData.oneRefMode) { 
-                awardPointFromRef(hits[refs[0]].type[0], parseInt(hits[refs[0]].type.substring(1)), refs[0]); 
-                hitsRef.remove(); 
-                return; 
-            }
-            const groups = {};
-            refs.forEach(refId => {
-                const type = hits[refId].type;
-                if (!groups[type]) groups[type] = [];
-                groups[type].push({ id: refId, time: hits[refId].time });
-            });
-            for (const type in groups) {
-                const refereeHits = groups[type];
-                if (refereeHits.length >= 2) {
-                    refereeHits.sort((a, b) => a.time - b.time);
-                    const timeGap = refereeHits[refereeHits.length - 1].time - refereeHits[0].time;
-                    if (timeGap <= 2500) {
-                        const combinedRefs = refereeHits.map(h => h.id).join(",");
-                        awardPointFromRef(type[0], parseInt(type.substring(1)), combinedRefs);
-                        hitsRef.remove(); 
-                        return; 
-                    }
-                }
+            recentHits.push({ ...hit, key: hitKey });
+            recentHits = recentHits.filter(h => (now - h.time) < 2000);
+            const matches = recentHits.filter(h => h.type === hit.type && h.refId !== hit.refId);
+            if (matches.length >= 1) {
+                const combinedRefs = hit.refId + "," + matches[0].refId;
+                awardPointFromRef(hit.type[0], parseInt(hit.type.substring(1)), combinedRefs);
+                db.ref('hits/' + hitKey).remove(); db.ref('hits/' + matches[0].key).remove();
+                recentHits = recentHits.filter(h => h.key !== hitKey && h.key !== matches[0].key);
             }
         });
 
+        function addPointDirect(field, pts) { 
+            const side = field[0]; currentData[field] += pts; 
+            currentData[side + pts] = (currentData[side + pts] || 0) + 1;
+            if (!currentData[side + 'Logs'] || !Array.isArray(currentData[side + 'Logs'])) { currentData[side + 'Logs'] = []; }
+            currentData[side + 'Logs'].push(pts + " (Thư ký)");
+            matchRef.update(currentData); 
+        }
+
+        function subPointDirect(field, pts) {
+            const side = field[0];
+            if (currentData[field] >= pts) {
+                currentData[field] -= pts;
+                if (currentData[side + pts] > 0) { currentData[side + pts]--; }
+                matchRef.update(currentData);
+            }
+        }
+
         function updateLogs(side, logs) {
             const container = document.getElementById(side + '-logs'); container.innerHTML = '';
-            if (logs) {
+            if (logs && Array.isArray(logs)) {
                 logs.forEach(val => {
-                    const div = document.createElement('div'); div.className = 'log-item'; div.innerText = '+' + val;
-                    container.appendChild(div);
+                    const div = document.createElement('div'); div.className = 'log-item'; div.innerText = '+' + val; container.appendChild(div);
                 });
                 container.scrollTop = container.scrollHeight;
             }
@@ -469,63 +582,6 @@
             }
         }
 
-        function celebrateWinner(winSide, boxId, isPtg = false) {
-            if (currentData.winnerDeclared) return;
-            matchRef.update({ run: false, winnerDeclared: true });
-            stopLocalTimer();
-            if (isPtg) {
-                document.getElementById('ptg-display').style.display = 'block';
-                const scoreId = winSide === 'red' ? 'r-score' : 'b-score';
-                document.getElementById(scoreId).classList.add('score-flash');
-                setTimeout(() => {
-                    document.getElementById('ptg-display').style.display = 'none';
-                    document.getElementById(scoreId).classList.remove('score-flash');
-                    if (winSide === 'red') currentData.rW++; else currentData.bW++;
-                    matchRef.update({ rW: currentData.rW, bW: currentData.bW });
-                }, 3000);
-            } else {
-                flash(boxId, 'flash-winner');
-                const banner = document.getElementById('winner-banner');
-                document.getElementById('winner-name-text').innerText = winSide === 'red' ? (currentData.rName || "HONG") : (currentData.bName || "CHUNG");
-                banner.style.backgroundColor = winSide === 'red' ? "rgba(255, 23, 68, 0.85)" : "rgba(41, 98, 255, 0.85)";
-                banner.style.display = 'flex';
-                setTimeout(() => {
-                    banner.style.display = 'none';
-                    if (winSide === 'red') currentData.rW++; else currentData.bW++;
-                    matchRef.update({ rW: currentData.rW, bW: currentData.bW });
-                }, 3000);
-            }
-        }
-
-        function nextRoundManual() {
-            if (!currentData.winnerDeclared) {
-                let winSide = '';
-                if (currentData.rS > currentData.bS) winSide = 'red';
-                else if (currentData.bS > currentData.rS) winSide = 'blue';
-                else {
-                    let r46Val = (currentData.r6 || 0) * 6 + (currentData.r4 || 0) * 4;
-                    let b46Val = (currentData.b6 || 0) * 6 + (currentData.b4 || 0) * 4;
-                    if (r46Val > b46Val) { winSide = 'red'; alert(`Hòa! ĐỎ thắng nhờ đòn 4&6 cao hơn.`); } 
-                    else if (b46Val > r46Val) { winSide = 'blue'; alert(`Hòa! XANH thắng nhờ đòn 4&6 cao hơn.`); } 
-                    else {
-                        const checkOrder = [6, 4, 3, 2, 1];
-                        for (let p of checkOrder) {
-                            let rCount = (currentData['r' + p] || 0);
-                            let bCount = (currentData['b' + p] || 0);
-                            if (rCount > bCount) { winSide = 'red'; break; } 
-                            else if (bCount > rCount) { winSide = 'blue'; break; }
-                        }
-                    }
-                    if (!winSide) winSide = confirm("Hòa tuyệt đối! ĐỎ (OK) thắng ưu thế?") ? 'red' : 'blue';
-                }
-                celebrateWinner(winSide, winSide === 'red' ? 'red-box' : 'blue-box');
-            } else finalizeRound();
-        }
-
-        function finalizeRound() {
-            matchRef.set({ bS:0,rS:0,bG:0,rG:0,bW:currentData.bW,rW:currentData.rW,round:currentData.round+1,time:getSetMatchTime(),run:false,isRest:false,rName:currentData.rName,bName:currentData.bName,rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled, oneRefMode: currentData.oneRefMode, winnerDeclared:false, maxGj: currentData.maxGj, maxPts: currentData.maxPts, matchNum: currentData.matchNum, weightNum: currentData.weightNum, weightSign: currentData.weightSign, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 });
-        }
-
         function addGj(f) { 
             currentData[f] += 1; const opp = f === 'bG' ? 'r' : 'b'; currentData[opp + 'S'] += 1; 
             if (currentData.maxGj > 0 && currentData[f] >= currentData.maxGj) celebrateWinner(opp, opp === 'r' ? 'red-box' : 'blue-box');
@@ -534,59 +590,25 @@
         
         function subGj(f) { 
             if(currentData[f] > 0) { 
-                currentData[f] -= 1; 
-                const opp = f === 'bG' ? 'r' : 'b'; 
+                currentData[f] -= 1; const opp = f === 'bG' ? 'r' : 'b'; 
                 if(currentData[opp + 'S'] > 0) currentData[opp + 'S'] -= 1; 
                 matchRef.update(currentData); 
             } 
         }
 
+        function updateRefPassword(id) { db.ref('referee_passwords/' + id).set(document.getElementById('pw-' + id).value); }
+        function updateWeight() { matchRef.update({ weightSign: document.getElementById('in-weight-combined').value.startsWith('+') || document.getElementById('in-weight-combined').value.startsWith('-') ? document.getElementById('in-weight-combined').value.charAt(0) : "", weightNum: document.getElementById('in-weight-combined').value.replace(/^[+-]/, "") }); }
         function toggleOneRef() { matchRef.update({ oneRefMode: document.getElementById('one-ref-toggle').checked }); }
         function updateRules() { matchRef.update({ maxGj: parseInt(document.getElementById('in-max-gj').value), maxPts: parseInt(document.getElementById('in-max-pts').value) }); }
         function updateNames() { matchRef.update({ rName: document.getElementById('in-r-name').value || currentData.rName, bName: document.getElementById('in-b-name').value || currentData.bName }); }
         function updateMatchNum() { matchRef.update({ matchNum: parseInt(document.getElementById('in-match-num').value) || 1 }); }
-        
-        function addPointDirect(field, pts) { 
-            const side = field[0]; currentData[field] += pts; 
-            currentData[side + pts] = (currentData[side + pts] || 0) + 1;
-            if (!currentData[side + 'Logs']) currentData[side + 'Logs'] = [];
-            currentData[side + 'Logs'].push(pts.toString());
-            matchRef.update(currentData); 
-        }
-
-        function subPointDirect(field, pts) {
-            const side = field[0];
-            if (currentData[field] >= pts) {
-                currentData[field] -= pts;
-                if (currentData[side + pts] > 0) {
-                    currentData[side + pts]--;
-                }
-                matchRef.update(currentData);
-            }
-        }
-
-        function setCustomTime() { 
-            const val = getSetMatchTime(); currentData.time = val; matchRef.update({ time: val, isRest: false }); 
-        }
-        function setRestTime() {
-            const m = parseInt(document.getElementById('in-rest-min').value) || 0;
-            const s = parseInt(document.getElementById('in-rest-sec').value) || 0;
-            currentData.time = (m * 60) + s;
-            matchRef.update({ time: currentData.time, isRest: true, run: false });
-        }
+        function setCustomTime() { matchRef.update({ time: getSetMatchTime(), isRest: false }); }
+        function setRestTime() { matchRef.update({ time: (parseInt(document.getElementById('in-rest-min').value)*60) + parseInt(document.getElementById('in-rest-sec').value), isRest: true, run: false }); }
         function toggleGap() { matchRef.update({ gapEnabled: document.getElementById('gap-toggle').checked }); }
         function flash(id, className) { const el = document.getElementById(id); el.classList.remove('flash', 'flash-winner'); void el.offsetWidth; el.classList.add(className); }
-        function updateDots(id, count) { 
-            const dots = document.getElementById(id).children; for(let i=0; i<2; i++) { dots[i].className = i < count ? 'dot active' : 'dot'; }
-        }
+        function updateDots(id, count) { const dots = document.getElementById(id).children; for(let i=0; i<2; i++) { dots[i].className = i < count ? 'dot active' : 'dot'; } }
         function adjustScoreSize(id, score) { const el = document.getElementById(id); if (score >= 100) el.style.fontSize = "20vw"; else if (score >= 10) el.style.fontSize = "24vw"; else el.style.fontSize = "27vw"; }
-        
-        function resetAll() { 
-            if(confirm("Reset toàn bộ trận đấu?")) { 
-                stopLocalTimer(); 
-                matchRef.set({bS:0,rS:0,bG:0,rG:0,bW:0,rW:0,round:1,time:getSetMatchTime(),run:false,isRest:false,rName:currentData.rName,bName:currentData.bName,rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled, oneRefMode: currentData.oneRefMode, winnerDeclared: false, maxGj: currentData.maxGj, maxPts: currentData.maxPts, matchNum: currentData.matchNum, weightNum: currentData.weightNum, weightSign: currentData.weightSign, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0}); 
-            } 
-        }
+        function resetAll() { if(confirm("Reset toàn bộ trận đấu?")) { stopLocalTimer(); matchRef.set({bS:0,rS:0,bG:0,rG:0,bW:0,rW:0,round:1,time:getSetMatchTime(),run:false,isRest:false,rName:currentData.rName,bName:currentData.bName,rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled, oneRefMode: currentData.oneRefMode, winnerDeclared: false, maxGj: currentData.maxGj, maxPts: currentData.maxPts, matchNum: currentData.matchNum, weightNum: currentData.weightNum, weightSign: currentData.weightSign, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0}); hitsRef.remove(); recentHits = []; } }
     </script>
 </body>
 </html>
