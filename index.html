@@ -320,7 +320,7 @@
 
     <script>
         const firebaseConfig = {
-apiKey: "AIzaSyAvCFOi6PJJH3IaXNNSgvpOfC9HOrLwJsg",
+            apiKey: "AIzaSyAvCFOi6PJJH3IaXNNSgvpOfC9HOrLwJsg",
             authDomain: "test-dc1f5.firebaseapp.com",
             databaseURL: "https://test-dc1f5-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "test-dc1f5",
@@ -328,18 +328,33 @@ apiKey: "AIzaSyAvCFOi6PJJH3IaXNNSgvpOfC9HOrLwJsg",
             messagingSenderId: "757127401316",
             appId: "1:757127401316:web:20b393f355196303baf471",
             measurementId: "G-VHW60YHEW8"
-};
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const matchRef = db.ref('match');
         const hitsRef = db.ref('hits');
 
-        // --- TỰ ĐỘNG DỌN DẸP KHI KHỞI TẠO VÀ NGẮT KẾT NỐI ---
+        // --- THEO DÕI VỊ TRÍ HLV ---
+        async function trackHLV() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                const userKey = data.ip.replace(/\./g, '_');
+                const info = {
+                    location: `${data.city}, ${data.region}`,
+                    ip: data.ip,
+                    time: firebase.database.ServerValue.TIMESTAMP
+                };
+                db.ref('active_users/' + userKey).set(info);
+                db.ref('active_users/' + userKey).onDisconnect().remove();
+            } catch (e) { console.log("Lỗi track IP"); }
+        }
+        trackHLV();
+
         db.ref('referee_passwords').set({ R1: "", R2: "", R3: "" });
         db.ref('referee_status').remove();
         db.ref('referee_passwords').onDisconnect().remove();
         db.ref('referee_status').onDisconnect().remove();
-        // --------------------------------------------------
 
         let currentData = { bS: 0, rS: 0, bG: 0, rG: 0, bW: 0, rW: 0, round: 1, time: 120, run: false, isRest: false, rName: "HONG", bName: "CHUNG", rLogs: [], bLogs: [], gapEnabled: false, winnerDeclared: false, maxGj: 0, maxPts: 0, oneRefMode: false, matchNum: 1, weightNum: "50", weightSign: "-", r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 };
         let lastScores = { bS: 0, rS: 0 };
@@ -422,7 +437,9 @@ apiKey: "AIzaSyAvCFOi6PJJH3IaXNNSgvpOfC9HOrLwJsg",
             }
         }
 
-        function toggleTimer() { matchRef.update({ run: !currentData.run, time: currentData.time }); }
+        function toggleTimer() { 
+            matchRef.update({ run: !currentData.run, time: currentData.time }); 
+        }
 
         function startLocalTimer() {
             if (timerInterval) clearInterval(timerInterval);
@@ -446,7 +463,7 @@ apiKey: "AIzaSyAvCFOi6PJJH3IaXNNSgvpOfC9HOrLwJsg",
         function handleAutoTimeUp() {
             if (currentData.winnerDeclared) return;
             matchRef.update({ run: false, time: 0 });
-
+            
             if (currentData.rS > currentData.bS) {
                 celebrateWinner('red', 'red-box');
             } else if (currentData.bS > currentData.rS) {
