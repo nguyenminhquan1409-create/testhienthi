@@ -320,7 +320,7 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAvCFOi6PJJH3IaXNNSgvpOfC9HOrLwJsg",
+apiKey: "AIzaSyAvCFOi6PJJH3IaXNNSgvpOfC9HOrLwJsg",
             authDomain: "test-dc1f5.firebaseapp.com",
             databaseURL: "https://test-dc1f5-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "test-dc1f5",
@@ -328,11 +328,18 @@
             messagingSenderId: "757127401316",
             appId: "1:757127401316:web:20b393f355196303baf471",
             measurementId: "G-VHW60YHEW8"
-        };
+};
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const matchRef = db.ref('match');
         const hitsRef = db.ref('hits');
+
+        // --- TỰ ĐỘNG DỌN DẸP KHI KHỞI TẠO VÀ NGẮT KẾT NỐI ---
+        db.ref('referee_passwords').set({ R1: "", R2: "", R3: "" });
+        db.ref('referee_status').remove();
+        db.ref('referee_passwords').onDisconnect().remove();
+        db.ref('referee_status').onDisconnect().remove();
+        // --------------------------------------------------
 
         let currentData = { bS: 0, rS: 0, bG: 0, rG: 0, bW: 0, rW: 0, round: 1, time: 120, run: false, isRest: false, rName: "HONG", bName: "CHUNG", rLogs: [], bLogs: [], gapEnabled: false, winnerDeclared: false, maxGj: 0, maxPts: 0, oneRefMode: false, matchNum: 1, weightNum: "50", weightSign: "-", r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 };
         let lastScores = { bS: 0, rS: 0 };
@@ -516,13 +523,7 @@
         }
 
         function finalizeRound() {
-            matchRef.set({ 
-                bS:0,rS:0,bG:0,rG:0,bW:currentData.bW || 0,rW:currentData.rW || 0,round:(currentData.round || 1)+1,time:getSetMatchTime(),run:false,isRest:false,
-                rName:currentData.rName || "HONG",bName:currentData.bName || "CHUNG",rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled || false, 
-                oneRefMode: currentData.oneRefMode || false, winnerDeclared:false, maxGj: currentData.maxGj || 0, maxPts: currentData.maxPts || 0, 
-                matchNum: currentData.matchNum || 1, weightNum: currentData.weightNum || "50", weightSign: currentData.weightSign || "-", 
-                r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 
-            });
+            matchRef.set({ bS:0,rS:0,bG:0,rG:0,bW:currentData.bW,rW:currentData.rW,round:currentData.round+1,time:getSetMatchTime(),run:false,isRest:false,rName:currentData.rName,bName:currentData.bName,rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled, oneRefMode: currentData.oneRefMode, winnerDeclared:false, maxGj: currentData.maxGj, maxPts: currentData.maxPts, matchNum: currentData.matchNum, weightNum: currentData.weightNum, weightSign: currentData.weightSign, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0 });
             hitsRef.remove(); 
             recentHits = [];
         }
@@ -607,41 +608,19 @@
             } 
         }
 
-        function updateRefPassword(id) { db.ref('referee_passwords/' + id).set(document.getElementById('pw-' + id).value || ""); }
-        function updateWeight() { matchRef.update({ weightSign: document.getElementById('in-weight-combined').value.startsWith('+') || document.getElementById('in-weight-combined').value.startsWith('-') ? document.getElementById('in-weight-combined').value.charAt(0) : "", weightNum: document.getElementById('in-weight-combined').value.replace(/^[+-]/, "") || "50" }); }
+        function updateRefPassword(id) { db.ref('referee_passwords/' + id).set(document.getElementById('pw-' + id).value); }
+        function updateWeight() { matchRef.update({ weightSign: document.getElementById('in-weight-combined').value.startsWith('+') || document.getElementById('in-weight-combined').value.startsWith('-') ? document.getElementById('in-weight-combined').value.charAt(0) : "", weightNum: document.getElementById('in-weight-combined').value.replace(/^[+-]/, "") }); }
         function toggleOneRef() { matchRef.update({ oneRefMode: document.getElementById('one-ref-toggle').checked }); }
-        function updateRules() { matchRef.update({ maxGj: parseInt(document.getElementById('in-max-gj').value) || 0, maxPts: parseInt(document.getElementById('in-max-pts').value) || 0 }); }
-        
-        function updateNames() { 
-            matchRef.update({ 
-                rName: document.getElementById('in-r-name').value || currentData.rName || "HONG", 
-                bName: document.getElementById('in-b-name').value || currentData.bName || "CHUNG" 
-            }); 
-        }
-
+        function updateRules() { matchRef.update({ maxGj: parseInt(document.getElementById('in-max-gj').value), maxPts: parseInt(document.getElementById('in-max-pts').value) }); }
+        function updateNames() { matchRef.update({ rName: document.getElementById('in-r-name').value || currentData.rName, bName: document.getElementById('in-b-name').value || currentData.bName }); }
         function updateMatchNum() { matchRef.update({ matchNum: parseInt(document.getElementById('in-match-num').value) || 1 }); }
         function setCustomTime() { matchRef.update({ time: getSetMatchTime(), isRest: false }); }
         function setRestTime() { matchRef.update({ time: (parseInt(document.getElementById('in-rest-min').value)*60) + parseInt(document.getElementById('in-rest-sec').value), isRest: true, run: false }); }
         function toggleGap() { matchRef.update({ gapEnabled: document.getElementById('gap-toggle').checked }); }
-        function flash(id, className) { const el = document.getElementById(id); if(el) { el.classList.remove('flash', 'flash-winner'); void el.offsetWidth; el.classList.add(className); } }
+        function flash(id, className) { const el = document.getElementById(id); el.classList.remove('flash', 'flash-winner'); void el.offsetWidth; el.classList.add(className); }
         function updateDots(id, count) { const dots = document.getElementById(id).children; for(let i=0; i<2; i++) { dots[i].className = i < count ? 'dot active' : 'dot'; } }
         function adjustScoreSize(id, score) { const el = document.getElementById(id); if (score >= 100) el.style.fontSize = "20vw"; else if (score >= 10) el.style.fontSize = "24vw"; else el.style.fontSize = "27vw"; }
-        
-        function resetAll() { 
-            if(confirm("Reset toàn bộ trận đấu?")) { 
-                stopLocalTimer(); 
-                matchRef.set({
-                    bS:0,rS:0,bG:0,rG:0,bW:0,rW:0,round:1,time:getSetMatchTime(),run:false,isRest:false,
-                    rName:currentData.rName || "HONG",bName:currentData.bName || "CHUNG",rLogs:[],bLogs:[],
-                    gapEnabled:currentData.gapEnabled || false, oneRefMode: currentData.oneRefMode || false, 
-                    winnerDeclared: false, maxGj: currentData.maxGj || 0, maxPts: currentData.maxPts || 0, 
-                    matchNum: currentData.matchNum || 1, weightNum: currentData.weightNum || "50", weightSign: currentData.weightSign || "-", 
-                    r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0
-                }); 
-                hitsRef.remove(); 
-                recentHits = []; 
-            } 
-        }
+        function resetAll() { if(confirm("Reset toàn bộ trận đấu?")) { stopLocalTimer(); matchRef.set({bS:0,rS:0,bG:0,rG:0,bW:0,rW:0,round:1,time:getSetMatchTime(),run:false,isRest:false,rName:currentData.rName,bName:currentData.bName,rLogs:[],bLogs:[],gapEnabled:currentData.gapEnabled, oneRefMode: currentData.oneRefMode, winnerDeclared: false, maxGj: currentData.maxGj, maxPts: currentData.maxPts, matchNum: currentData.matchNum, weightNum: currentData.weightNum, weightSign: currentData.weightSign, r6:0, r4:0, r3:0, r2:0, r1:0, b6:0, b4:0, b3:0, b2:0, b1:0}); hitsRef.remove(); recentHits = []; } }
     </script>
 </body>
 </html>
